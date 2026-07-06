@@ -11,6 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "activity_logs")
 public class ActivityLog {
@@ -29,6 +31,9 @@ public class ActivityLog {
 
     @Column(nullable = false)
     private String action;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     public Long getId() {
         return id;
@@ -56,5 +61,13 @@ public class ActivityLog {
 
     public void setAction(String action) {
         this.action = action;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

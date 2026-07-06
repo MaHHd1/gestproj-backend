@@ -14,6 +14,7 @@ public record TaskResponse(
         TaskPriority priority,
         LocalDate dueDate,
         boolean late,
-        Long assignedTo
+        Long assignedTo,
+        String assignedToUsername
 ) {
 }

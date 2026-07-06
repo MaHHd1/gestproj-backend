@@ -2,13 +2,16 @@ package com.gestproj.backend.member.service;
 
 import com.gestproj.backend.common.enums.ProjectMemberRole;
 import com.gestproj.backend.common.enums.ProjectMemberStatus;
+import com.gestproj.backend.common.enums.NotificationType;
 import com.gestproj.backend.common.exception.ConflictException;
 import com.gestproj.backend.common.exception.ForbiddenException;
 import com.gestproj.backend.common.exception.ResourceNotFoundException;
+import com.gestproj.backend.activitylog.service.ActivityLogService;
 import com.gestproj.backend.member.dto.ProjectMemberResponse;
 import com.gestproj.backend.member.dto.ProjectMemberUpdateRequest;
 import com.gestproj.backend.member.entity.ProjectMember;
 import com.gestproj.backend.member.repository.ProjectMemberRepository;
+import com.gestproj.backend.notification.service.NotificationService;
 import com.gestproj.backend.project.entity.Project;
 import com.gestproj.backend.user.entity.User;
 import org.springframework.stereotype.Service;
@@ -19,9 +22,13 @@ import java.util.List;
 public class ProjectMemberService {
 
     private final ProjectMemberRepository projectMemberRepository;
+    private final NotificationService notificationService;
+    private final ActivityLogService activityLogService;
 
-    public ProjectMemberService(ProjectMemberRepository projectMemberRepository) {
+    public ProjectMemberService(ProjectMemberRepository projectMemberRepository, NotificationService notificationService, ActivityLogService activityLogService) {
         this.projectMemberRepository = projectMemberRepository;
+        this.notificationService = notificationService;
+        this.activityLogService = activityLogService;
     }
 
     public ProjectMember addMember(Project project, User user, ProjectMemberRole role) {
@@ -75,6 +82,7 @@ public class ProjectMemberService {
             throw new ForbiddenException("Project owner role cannot be downgraded here");
         }
 
+        ProjectMemberStatus originalStatus = member.getStatus();
         if (request.role() != null) {
             member.setRole(request.role());
         }
@@ -94,7 +102,20 @@ public class ProjectMemberService {
         member.setCanInviteMember(request.canInviteMember());
         member.setCanManageMembers(request.canManageMembers());
 
-        return toResponse(projectMemberRepository.save(member));
+        ProjectMember savedMember = projectMemberRepository.save(member);
+        activityLogService.log(project, actor, "Updated member " + savedMember.getUser().getUsername());
+        notificationService.notify(
+                savedMember.getUser(),
+                request.status() != null && request.status() != originalStatus
+                        ? NotificationType.MEMBER_STATUS_CHANGED
+                        : NotificationType.MEMBER_UPDATED,
+                "Project member updated",
+                "Your role or permissions were updated in project " + project.getName(),
+                project,
+                null,
+                savedMember
+        );
+        return toResponse(savedMember);
     }
 
     public ProjectMember findProjectMember(Project project, User user) {

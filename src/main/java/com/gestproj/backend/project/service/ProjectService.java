@@ -3,6 +3,8 @@ package com.gestproj.backend.project.service;
 import com.gestproj.backend.common.enums.ProjectMemberRole;
 import com.gestproj.backend.common.exception.ForbiddenException;
 import com.gestproj.backend.common.exception.ResourceNotFoundException;
+import com.gestproj.backend.activitylog.service.ActivityLogService;
+import com.gestproj.backend.project.dto.ProjectUpdateRequest;
 import com.gestproj.backend.member.service.ProjectMemberService;
 import com.gestproj.backend.project.dto.ProjectCreateRequest;
 import com.gestproj.backend.project.dto.ProjectResponse;
@@ -19,11 +21,13 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectMemberService projectMemberService;
+    private final ActivityLogService activityLogService;
     private final UserService userService;
 
-    public ProjectService(ProjectRepository projectRepository, ProjectMemberService projectMemberService, UserService userService) {
+    public ProjectService(ProjectRepository projectRepository, ProjectMemberService projectMemberService, ActivityLogService activityLogService, UserService userService) {
         this.projectRepository = projectRepository;
         this.projectMemberService = projectMemberService;
+        this.activityLogService = activityLogService;
         this.userService = userService;
     }
 
@@ -37,6 +41,7 @@ public class ProjectService {
 
         Project savedProject = projectRepository.save(project);
         projectMemberService.addMember(savedProject, currentUser, ProjectMemberRole.OWNER);
+        activityLogService.log(savedProject, currentUser, "Created project");
 
         return toResponse(savedProject);
     }
@@ -60,7 +65,7 @@ public class ProjectService {
         return toResponse(project);
     }
 
-    public ProjectResponse update(Long id, ProjectCreateRequest request, String currentUserEmail) {
+    public ProjectResponse update(Long id, ProjectUpdateRequest request, String currentUserEmail) {
         User currentUser = userService.findEntityByEmail(currentUserEmail);
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
@@ -71,7 +76,9 @@ public class ProjectService {
 
         project.setName(request.name().trim());
         project.setDescription(request.description() == null ? null : request.description().trim());
-        return toResponse(projectRepository.save(project));
+        Project savedProject = projectRepository.save(project);
+        activityLogService.log(savedProject, currentUser, "Updated project");
+        return toResponse(savedProject);
     }
 
     public void delete(Long id, String currentUserEmail) {
@@ -83,6 +90,7 @@ public class ProjectService {
             throw new ForbiddenException("Only the project owner can delete this project");
         }
 
+        activityLogService.log(project, currentUser, "Deleted project");
         projectRepository.delete(project);
     }
 

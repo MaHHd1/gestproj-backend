@@ -2,6 +2,7 @@ package com.gestproj.backend.project.controller;
 
 import com.gestproj.backend.project.dto.ProjectCreateRequest;
 import com.gestproj.backend.project.dto.ProjectResponse;
+import com.gestproj.backend.project.dto.ProjectUpdateRequest;
 import com.gestproj.backend.project.service.ProjectService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -44,7 +45,7 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProjectResponse> update(@PathVariable Long id, @Valid @RequestBody ProjectCreateRequest request, Authentication authentication) {
+    public ResponseEntity<ProjectResponse> update(@PathVariable Long id, @Valid @RequestBody ProjectUpdateRequest request, Authentication authentication) {
         return ResponseEntity.ok(projectService.update(id, request, authentication.getName()));
     }
 
