@@ -3,11 +3,7 @@ package com.gestproj.backend.member.dto;
 import com.gestproj.backend.common.enums.ProjectMemberRole;
 import com.gestproj.backend.common.enums.ProjectMemberStatus;
 
-public record ProjectMemberResponse(
-        Long id,
-        Long projectId,
-        Long userId,
-        String username,
+public record ProjectMemberUpdateRequest(
         ProjectMemberRole role,
         ProjectMemberStatus status,
         String roleTitle,
