@@ -2,6 +2,7 @@ package com.gestproj.backend.project.controller;
 
 import com.gestproj.backend.project.dto.ProjectCreateRequest;
 import com.gestproj.backend.project.dto.ProjectResponse;
+import com.gestproj.backend.project.dto.ProjectStatisticsResponse;
 import com.gestproj.backend.project.dto.ProjectUpdateRequest;
 import com.gestproj.backend.project.service.ProjectService;
 import jakarta.validation.Valid;
@@ -42,6 +43,11 @@ public class ProjectController {
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponse> getById(@PathVariable Long id, Authentication authentication) {
         return ResponseEntity.ok(projectService.getById(id, authentication.getName()));
+    }
+
+    @GetMapping("/{id}/statistics")
+    public ResponseEntity<ProjectStatisticsResponse> getStatistics(@PathVariable Long id, Authentication authentication) {
+        return ResponseEntity.ok(projectService.getStatistics(id, authentication.getName()));
     }
 
     @PutMapping("/{id}")
