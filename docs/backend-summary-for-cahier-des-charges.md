@@ -382,12 +382,15 @@ GET  /auth/me
 
 ```text
 GET /users/{id}
+GET /users/search?query={email|username|name}
 ```
 
 Note:
 
 - Direct user creation through `POST /users` was removed.
 - User creation must go through `/auth/register`.
+- User search allows finding users by email, username, or name for project invitations.
+- Returns list of matching users with id, email, username, name, and profile image URL.
 
 ### Projects
 
@@ -395,6 +398,7 @@ Note:
 POST   /projects
 GET    /projects
 GET    /projects/{id}
+GET    /projects/{id}/statistics
 PUT    /projects/{id}
 DELETE /projects/{id}
 ```
@@ -404,6 +408,13 @@ Behavior:
 - Creating a project makes the authenticated user the owner.
 - A project owner is also inserted into `project_members` with role `OWNER`.
 - `GET /projects` returns all projects where the authenticated user is a member.
+- `GET /projects/{id}/statistics` returns project dashboard statistics:
+  - `totalTasks`: Total number of tasks in the project
+  - `completedTasks`: Number of completed tasks (status = TERMINE)
+  - `inProgressTasks`: Number of in-progress tasks (status = EN_COURS)
+  - `notStartedTasks`: Number of not started tasks (status = A_FAIRE)
+  - `lateTasks`: Number of tasks marked as late
+  - `completionPercentage`: Percentage of completed tasks (0-100)
 
 ### Tasks
 
@@ -424,6 +435,24 @@ GET /projects/{projectId}/tasks?priority=HAUTE
 GET /projects/{projectId}/tasks?assignedToMe=true
 GET /projects/{projectId}/tasks?overdue=true
 ```
+
+### Task Comments
+
+```text
+POST   /tasks/{taskId}/comments
+GET    /tasks/{taskId}/comments
+DELETE /tasks/{taskId}/comments/{commentId}
+```
+
+Behavior:
+
+- Enables team discussion and collaboration on specific tasks.
+- Only project members can view and create comments on tasks.
+- Comments include: `id`, `taskId`, `userId`, `username`, `userEmail`, `content`, `createdAt`, `updatedAt`.
+- Comments are returned in reverse chronological order (newest first).
+- Only the comment author can delete their own comments.
+- Deleted comments are removed from the database (no soft delete).
+- Perfect for team communication, task clarifications, and decision documentation.
 
 ### Invitations
 
@@ -476,7 +505,9 @@ Implemented backend features:
 - User login
 - JWT authentication
 - Current user endpoint
+- **User search** by email, username, or name (for project member invitation)
 - Project CRUD
+- **Project statistics** dashboard showing task completion metrics
 - Automatic owner membership when project is created
 - Project member listing
 - Project member update
@@ -487,6 +518,7 @@ Implemented backend features:
 - Due date and late flag
 - Paginated task listing
 - Task filters by status, priority, late state, and assigned user
+- **Task comments** with full CRUD, permission checks, and reverse-chronological ordering
 - Project invitations by email/token
 - Invitation accept/reject
 - Notifications for invitation and member events
@@ -497,8 +529,229 @@ Implemented backend features:
 - OpenAPI/Swagger documentation with interactive UI
 - Actuator health and info endpoints for monitoring
 - Scheduled job to automatically update task lateness flag
+- **API rate limiting** (100 requests per minute per user for stability and security)
 
-## 10. Background Scheduled Jobs
+## 10. Tier 1 Enhancements (Recently Added)
+
+In Phase 2 of backend development, four high-impact features were added to improve user experience and provide production-ready capabilities:
+
+### 1. User Search (GET /users/search)
+
+**Purpose**: Enable users to find other platform users for project member invitations.
+
+**Endpoint**: 
+```
+GET /users/search?query={searchTerm}
+```
+
+**Implementation Details**:
+- Search implementation in `UserRepository` using custom JPQL query with `LOWER()` and `LIKE` operators
+- Case-insensitive search across three fields: email, username, and name
+- Returns list of matching users with basic profile information
+- Empty result set for null or empty query (safe default)
+
+**Example Requests**:
+```
+GET /users/search?query=john
+GET /users/search?query=john@example.com
+GET /users/search?query=john.doe
+```
+
+**Response Example**:
+```json
+[
+  {
+    "id": "u-001",
+    "email": "john.doe@example.com",
+    "username": "johndoe",
+    "name": "John Doe",
+    "profileImageUrl": null
+  },
+  {
+    "id": "u-002",
+    "email": "jane.johnson@example.com",
+    "username": "janeJ",
+    "name": "Jane Johnson",
+    "profileImageUrl": null
+  }
+]
+```
+
+**Use Case**: 
+- Project owner or authorized member needs to invite a specific user
+- User searches by email, username, or name
+- System returns matching users
+- Inviter selects desired user and sends invitation
+
+### 2. Project Statistics Dashboard (GET /projects/{id}/statistics)
+
+**Purpose**: Provide real-time project metrics for dashboard and progress visualization.
+
+**Endpoint**:
+```
+GET /projects/{projectId}/statistics
+```
+
+**Implementation Details**:
+- Statistics calculated in `ProjectService.getStatistics()` method
+- Aggregates task data using Java streams for filtering and counting
+- Metrics are computed fresh on each request (real-time)
+- Completion percentage calculated as: (completedTasks / totalTasks) * 100, rounded to 2 decimals
+
+**Response Example**:
+```json
+{
+  "totalTasks": 25,
+  "completedTasks": 10,
+  "inProgressTasks": 8,
+  "notStartedTasks": 7,
+  "lateTasks": 2,
+  "completionPercentage": 40.00
+}
+```
+
+**Metrics Explained**:
+- `totalTasks`: Sum of all tasks in the project (all statuses)
+- `completedTasks`: Tasks with status = TERMINE
+- `inProgressTasks`: Tasks with status = EN_COURS
+- `notStartedTasks`: Tasks with status = A_FAIRE
+- `lateTasks`: Tasks where is_late = true (regardless of status)
+- `completionPercentage`: Percentage of completed tasks (0-100)
+
+**Use Case**:
+- Dashboard displays project health at a glance
+- Project manager monitors task completion progress
+- Stakeholders see project status in real-time
+- No need to manually count tasks
+
+### 3. Task Comments (Full CRUD with Permissions)
+
+**Purpose**: Enable team members to collaborate and discuss task details within the application.
+
+**Endpoints**:
+```
+POST   /tasks/{taskId}/comments
+GET    /tasks/{taskId}/comments
+DELETE /tasks/{taskId}/comments/{commentId}
+```
+
+**Database Changes**:
+- New table `task_comments` (added via Flyway migration V2)
+- Columns: id, task_id, user_id, content, created_at, updated_at
+- Indexes on: task_id, user_id, created_at DESC
+- Foreign key constraints with CASCADE delete on task, RESTRICT on user
+
+**Implementation Details**:
+- `TaskComment` entity with ManyToOne relationships to Task and User
+- `TaskCommentService` enforces permission checks before every operation
+- `TaskCommentRepository` provides custom query for fetching comments by task (ordered by created_at DESC)
+- Comments returned in reverse chronological order (newest first)
+
+**Permission Model**:
+- Create: User must be a project member (checked via `ProjectMemberService.isMember()`)
+- Read: User must be a project member
+- Delete: Only the comment author can delete their own comment
+- Database enforces RESTRICT on user_id foreign key (cannot delete a user with comments)
+
+**Request/Response Example**:
+
+Create comment:
+```json
+POST /tasks/{taskId}/comments
+{
+  "content": "This task needs clarification on the requirements."
+}
+```
+
+Response:
+```json
+{
+  "id": "tc-001",
+  "taskId": "t-001",
+  "userId": "u-001",
+  "username": "johndoe",
+  "userEmail": "john@example.com",
+  "content": "This task needs clarification on the requirements.",
+  "createdAt": "2024-01-15T10:30:00Z",
+  "updatedAt": "2024-01-15T10:30:00Z"
+}
+```
+
+Get comments on a task:
+```json
+GET /tasks/{taskId}/comments
+[
+  {
+    "id": "tc-002",
+    "taskId": "t-001",
+    "userId": "u-002",
+    "username": "janeJ",
+    "userEmail": "jane@example.com",
+    "content": "I've started investigating this.",
+    "createdAt": "2024-01-15T11:00:00Z",
+    "updatedAt": "2024-01-15T11:00:00Z"
+  },
+  {
+    "id": "tc-001",
+    "taskId": "t-001",
+    "userId": "u-001",
+    "username": "johndoe",
+    "userEmail": "john@example.com",
+    "content": "This task needs clarification on the requirements.",
+    "createdAt": "2024-01-15T10:30:00Z",
+    "updatedAt": "2024-01-15T10:30:00Z"
+  }
+]
+```
+
+**Use Case**:
+- Team member adds a question or clarification to a task
+- Other members reply with insights or answers
+- Full task discussion stays within the application (no need for external chat)
+- Decisions and discussions are logged with timestamps and authors
+
+### 4. API Rate Limiting (Security & Stability)
+
+**Purpose**: Protect the API from abuse, prevent accidental flooding, and ensure fair resource usage.
+
+**Configuration**:
+- Hard-coded limit: **100 requests per minute per user**
+- Applied to all endpoints globally
+- Tracks per authenticated user (JWT token) or per IP address (fallback)
+
+**Implementation Details**:
+- `RateLimitInterceptor` extends `HandlerInterceptor`
+- Registered in `WebMvcConfig` via `addInterceptors()`
+- Uses `ConcurrentHashMap` with `RequestTracker` class managing time windows
+- Time window resets every minute (tracks requests per calendar minute)
+- JWT token takes precedence over IP address for identifying users
+
+**Behavior**:
+- Requests are tracked and counted per minute
+- If count exceeds 100 in a minute window, subsequent requests get `429 TOO_MANY_REQUESTS`
+- Response includes `Retry-After` header
+- Time window automatically resets each minute
+
+**Example Error Response**:
+```
+HTTP/1.1 429 Too Many Requests
+Retry-After: 30
+
+{
+  "error": "Too many requests. Maximum 100 requests per minute allowed.",
+  "retryAfter": 30
+}
+```
+
+**Use Cases**:
+- Prevents accidental DDoS from frontend bug (e.g., infinite polling)
+- Limits impact of malicious actors or compromised credentials
+- Ensures stable performance during peak usage
+- Simple and transparent to end users (rate limit resets each minute)
+
+---
+
+## 11. Background Scheduled Jobs
 
 ### Task Lateness Scheduler
 
@@ -525,7 +778,7 @@ Purpose:
 - Allows tasks to be marked as late automatically without requiring a status change.
 - Optimized to only update tasks whose late status has changed.
 
-## 11. Manual API Tests Already Performed
+## 12. Manual API Tests Already Performed
 
 The following flow was manually tested with Postman/API calls:
 
@@ -554,7 +807,7 @@ Observed successful responses:
 - Task update returned updated fields.
 - Invitation creation returned invitation token and pending status.
 
-## 11. Automated Tests
+## 13. Automated Tests
 
 The backend contains unit/controller tests under:
 
@@ -594,7 +847,7 @@ Skipped: 0
 BUILD SUCCESS
 ```
 
-## 12. Suggested Diagrams to Generate
+## 14. Suggested Diagrams to Generate
 
 The cahier des charges should include at least these diagrams.
 
@@ -701,7 +954,7 @@ Flow:
 5. Invitation status becomes `ACCEPTED`.
 6. Notification is sent to inviter.
 
-## 13. Important Business Rules
+## 15. Important Business Rules
 
 - A user can belong to several projects.
 - A project has exactly one owner.
@@ -715,7 +968,7 @@ Flow:
 - Invitations expire after 7 days.
 - Activity logs are chronological and should not be modified after creation.
 
-## 14. Suggested Future Improvements
+## 16. Suggested Future Improvements
 
 Potential improvements for the next iterations:
 
@@ -728,7 +981,7 @@ Potential improvements for the next iterations:
 - Add Docker configuration after the application is stable.
 - Add CI pipeline for tests.
 
-## 15. Prompt to Give Claude
+## 17. Prompt to Give Claude
 
 Use this prompt:
 
