@@ -1,6 +1,7 @@
 package com.gestproj.backend.project.service;
 
 import com.gestproj.backend.common.enums.ProjectMemberRole;
+import com.gestproj.backend.common.enums.TaskStatus;
 import com.gestproj.backend.common.exception.ForbiddenException;
 import com.gestproj.backend.common.exception.ResourceNotFoundException;
 import com.gestproj.backend.activitylog.service.ActivityLogService;
@@ -8,8 +9,10 @@ import com.gestproj.backend.project.dto.ProjectUpdateRequest;
 import com.gestproj.backend.member.service.ProjectMemberService;
 import com.gestproj.backend.project.dto.ProjectCreateRequest;
 import com.gestproj.backend.project.dto.ProjectResponse;
+import com.gestproj.backend.project.dto.ProjectStatisticsResponse;
 import com.gestproj.backend.project.entity.Project;
 import com.gestproj.backend.project.repository.ProjectRepository;
+import com.gestproj.backend.task.repository.TaskRepository;
 import com.gestproj.backend.user.entity.User;
 import com.gestproj.backend.user.service.UserService;
 import org.springframework.stereotype.Service;
@@ -23,12 +26,14 @@ public class ProjectService {
     private final ProjectMemberService projectMemberService;
     private final ActivityLogService activityLogService;
     private final UserService userService;
+    private final TaskRepository taskRepository;
 
-    public ProjectService(ProjectRepository projectRepository, ProjectMemberService projectMemberService, ActivityLogService activityLogService, UserService userService) {
+    public ProjectService(ProjectRepository projectRepository, ProjectMemberService projectMemberService, ActivityLogService activityLogService, UserService userService, TaskRepository taskRepository) {
         this.projectRepository = projectRepository;
         this.projectMemberService = projectMemberService;
         this.activityLogService = activityLogService;
         this.userService = userService;
+        this.taskRepository = taskRepository;
     }
 
     public ProjectResponse create(ProjectCreateRequest request, String currentUserEmail) {
@@ -63,6 +68,35 @@ public class ProjectService {
         }
 
         return toResponse(project);
+    }
+
+    public ProjectStatisticsResponse getStatistics(Long projectId, String currentUserEmail) {
+        User currentUser = userService.findEntityByEmail(currentUserEmail);
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+
+        if (!projectMemberService.isMember(project, currentUser)) {
+            throw new ResourceNotFoundException("Project not found");
+        }
+
+        List<com.gestproj.backend.task.entity.Task> allTasks = project.getTasks();
+
+        long totalTasks = allTasks.size();
+        long completedTasks = allTasks.stream().filter(t -> t.getStatus() == TaskStatus.TERMINE).count();
+        long inProgressTasks = allTasks.stream().filter(t -> t.getStatus() == TaskStatus.EN_COURS).count();
+        long notStartedTasks = allTasks.stream().filter(t -> t.getStatus() == TaskStatus.A_FAIRE).count();
+        long lateTasks = allTasks.stream().filter(com.gestproj.backend.task.entity.Task::isLate).count();
+
+        double completionPercentage = totalTasks == 0 ? 0.0 : (double) completedTasks / totalTasks * 100;
+
+        return new ProjectStatisticsResponse(
+                totalTasks,
+                completedTasks,
+                inProgressTasks,
+                notStartedTasks,
+                lateTasks,
+                Math.round(completionPercentage * 100.0) / 100.0
+        );
     }
 
     public ProjectResponse update(Long id, ProjectUpdateRequest request, String currentUserEmail) {

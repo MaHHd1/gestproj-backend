@@ -9,6 +9,7 @@ import com.gestproj.backend.user.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Locale;
 
 @Service
@@ -47,6 +48,16 @@ public class UserService {
 
     public UserResponse getById(Long id) {
         return toResponse(findEntityById(id));
+    }
+
+    public List<UserResponse> search(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            return List.of();
+        }
+        return userRepository.searchByQuery(query.trim())
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     public User findEntityById(Long id) {
