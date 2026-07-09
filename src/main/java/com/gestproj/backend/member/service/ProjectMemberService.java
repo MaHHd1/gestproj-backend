@@ -53,11 +53,13 @@ public class ProjectMemberService {
     }
 
     public boolean isMember(Project project, User user) {
-        return projectMemberRepository.existsByProjectAndUser(project, user);
+        return projectMemberRepository.existsByProjectAndUserAndStatus(project, user, ProjectMemberStatus.ACTIVE);
     }
 
     public List<ProjectMember> getMembersForUser(User user) {
-        return projectMemberRepository.findAllByUser(user);
+        return projectMemberRepository.findAllByUser(user).stream()
+                .filter(member -> member.getStatus() == ProjectMemberStatus.ACTIVE)
+                .toList();
     }
 
     public List<ProjectMemberResponse> getProjectMembers(Project project) {
@@ -70,6 +72,10 @@ public class ProjectMemberService {
         ProjectMember actorMember = projectMemberRepository.findByProjectAndUser(project, actor)
                 .orElseThrow(() -> new ForbiddenException("You are not a member of this project"));
 
+        if (actorMember.getStatus() != ProjectMemberStatus.ACTIVE) {
+            throw new ForbiddenException("Your membership is not active");
+        }
+
         if (actorMember.getRole() != ProjectMemberRole.OWNER && !actorMember.isCanManageMembers()) {
             throw new ForbiddenException("You are not allowed to manage project members");
         }
@@ -78,7 +84,7 @@ public class ProjectMemberService {
                 .filter(existing -> existing.getProject().getId().equals(project.getId()))
                 .orElseThrow(() -> new ResourceNotFoundException("Project member not found"));
 
-        if (member.getRole() == ProjectMemberRole.OWNER && request.role() != ProjectMemberRole.OWNER) {
+        if (member.getRole() == ProjectMemberRole.OWNER && request.role() != null && request.role() != ProjectMemberRole.OWNER) {
             throw new ForbiddenException("Project owner role cannot be downgraded here");
         }
 
@@ -119,7 +125,7 @@ public class ProjectMemberService {
     }
 
     public ProjectMember findProjectMember(Project project, User user) {
-        return projectMemberRepository.findByProjectAndUser(project, user)
+        return projectMemberRepository.findByProjectAndUserAndStatus(project, user, ProjectMemberStatus.ACTIVE)
                 .orElseThrow(() -> new ResourceNotFoundException("Project member not found"));
     }
 

@@ -114,6 +114,7 @@ class ProjectMemberServiceTest {
         actorMember.setProject(project);
         actorMember.setUser(actor);
         actorMember.setRole(ProjectMemberRole.OWNER);
+        actorMember.setStatus(ProjectMemberStatus.ACTIVE);
         actorMember.setCanManageMembers(true);
 
         ProjectMember targetMember = new ProjectMember();

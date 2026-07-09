@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: gestproj-postgres
+    environment:
+      POSTGRES_DB: gestproj
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - gestproj-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d gestproj"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: gestproj-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gestproj
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      JWT_SECRET: please-change-this-secret-key-please-change-this-secret-key
+      JWT_EXPIRATION_MS: 86400000
+      APP_FRONTEND_URL: http://localhost:3000
+      MAIL_ENABLED: "false"
+      MAIL_HOST: smtp.resend.com
+      MAIL_PORT: 587
+      MAIL_USERNAME: resend
+      MAIL_PASSWORD: change-me
+      MAIL_FROM: no-reply@your-domain.com
+      MAIL_SMTP_AUTH: "true"
+      MAIL_SMTP_STARTTLS_ENABLE: "true"
+    ports:
+      - "8080:8080"
+
+volumes:
+  gestproj-postgres-data:
