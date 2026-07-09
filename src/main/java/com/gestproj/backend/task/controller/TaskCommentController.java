@@ -52,6 +52,6 @@ public class TaskCommentController {
             @PathVariable Long commentId,
             Authentication authentication
     ) {
-        return ResponseEntity.ok(taskCommentService.delete(commentId, authentication.getName()));
+        return ResponseEntity.ok(taskCommentService.delete(taskId, commentId, authentication.getName()));
     }
 }

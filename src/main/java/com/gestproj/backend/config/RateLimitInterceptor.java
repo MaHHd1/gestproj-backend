@@ -1,7 +1,6 @@
 package com.gestproj.backend.config;
 
-import com.gestproj.backend.common.exception.ForbiddenException;
-import org.springframework.http.HttpStatus;
+import com.gestproj.backend.common.exception.RateLimitExceededException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -23,8 +22,10 @@ public class RateLimitInterceptor implements HandlerInterceptor {
         RequestTracker tracker = requestTracker.computeIfAbsent(userIdentifier, k -> new RequestTracker());
 
         if (!tracker.allowRequest()) {
-            response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-            throw new ForbiddenException("Rate limit exceeded: Maximum " + MAX_REQUESTS_PER_MINUTE + " requests per minute");
+            throw new RateLimitExceededException(
+                    "Too many requests. Maximum " + MAX_REQUESTS_PER_MINUTE + " requests per minute allowed.",
+                    tracker.retryAfterSeconds()
+            );
         }
 
         return true;
@@ -54,6 +55,11 @@ public class RateLimitInterceptor implements HandlerInterceptor {
                 return true;
             }
             return false;
+        }
+
+        synchronized long retryAfterSeconds() {
+            long elapsed = System.currentTimeMillis() - lastResetTime;
+            return Math.max(1, (RATE_LIMIT_WINDOW_MS - elapsed + 999) / 1000);
         }
     }
 }

@@ -5,17 +5,22 @@ import com.gestproj.backend.common.enums.TaskStatus;
 import com.gestproj.backend.common.exception.ForbiddenException;
 import com.gestproj.backend.common.exception.ResourceNotFoundException;
 import com.gestproj.backend.activitylog.service.ActivityLogService;
+import com.gestproj.backend.activitylog.repository.ActivityLogRepository;
 import com.gestproj.backend.project.dto.ProjectUpdateRequest;
 import com.gestproj.backend.member.service.ProjectMemberService;
+import com.gestproj.backend.member.repository.ProjectMemberRepository;
+import com.gestproj.backend.notification.repository.NotificationRepository;
 import com.gestproj.backend.project.dto.ProjectCreateRequest;
 import com.gestproj.backend.project.dto.ProjectResponse;
 import com.gestproj.backend.project.dto.ProjectStatisticsResponse;
 import com.gestproj.backend.project.entity.Project;
 import com.gestproj.backend.project.repository.ProjectRepository;
+import com.gestproj.backend.projectinvitation.repository.ProjectInvitationRepository;
 import com.gestproj.backend.task.repository.TaskRepository;
 import com.gestproj.backend.user.entity.User;
 import com.gestproj.backend.user.service.UserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -27,13 +32,31 @@ public class ProjectService {
     private final ActivityLogService activityLogService;
     private final UserService userService;
     private final TaskRepository taskRepository;
+    private final NotificationRepository notificationRepository;
+    private final ProjectInvitationRepository projectInvitationRepository;
+    private final ProjectMemberRepository projectMemberRepository;
+    private final ActivityLogRepository activityLogRepository;
 
-    public ProjectService(ProjectRepository projectRepository, ProjectMemberService projectMemberService, ActivityLogService activityLogService, UserService userService, TaskRepository taskRepository) {
+    public ProjectService(
+            ProjectRepository projectRepository,
+            ProjectMemberService projectMemberService,
+            ActivityLogService activityLogService,
+            UserService userService,
+            TaskRepository taskRepository,
+            NotificationRepository notificationRepository,
+            ProjectInvitationRepository projectInvitationRepository,
+            ProjectMemberRepository projectMemberRepository,
+            ActivityLogRepository activityLogRepository
+    ) {
         this.projectRepository = projectRepository;
         this.projectMemberService = projectMemberService;
         this.activityLogService = activityLogService;
         this.userService = userService;
         this.taskRepository = taskRepository;
+        this.notificationRepository = notificationRepository;
+        this.projectInvitationRepository = projectInvitationRepository;
+        this.projectMemberRepository = projectMemberRepository;
+        this.activityLogRepository = activityLogRepository;
     }
 
     public ProjectResponse create(ProjectCreateRequest request, String currentUserEmail) {
@@ -115,6 +138,7 @@ public class ProjectService {
         return toResponse(savedProject);
     }
 
+    @Transactional
     public void delete(Long id, String currentUserEmail) {
         User currentUser = userService.findEntityByEmail(currentUserEmail);
         Project project = projectRepository.findById(id)
@@ -124,7 +148,11 @@ public class ProjectService {
             throw new ForbiddenException("Only the project owner can delete this project");
         }
 
-        activityLogService.log(project, currentUser, "Deleted project");
+        notificationRepository.deleteAllByProject(project);
+        activityLogRepository.deleteAllByProject(project);
+        projectInvitationRepository.deleteAllByProject(project);
+        taskRepository.deleteAllByProject(project);
+        projectMemberRepository.deleteAllByProject(project);
         projectRepository.delete(project);
     }
 

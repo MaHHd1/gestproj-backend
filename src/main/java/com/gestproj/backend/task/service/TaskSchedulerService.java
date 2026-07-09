@@ -18,7 +18,7 @@ public class TaskSchedulerService {
         this.taskRepository = taskRepository;
     }
 
-    @Scheduled(cron = "0 0 * * * *")
+    @Scheduled(cron = "0 0 0 * * *")
     public void updateTasksLateness() {
         LocalDate today = LocalDate.now();
         List<Task> allTasks = taskRepository.findAll();
