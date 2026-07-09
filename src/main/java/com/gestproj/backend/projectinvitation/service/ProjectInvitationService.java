@@ -7,6 +7,7 @@ import com.gestproj.backend.common.enums.NotificationType;
 import com.gestproj.backend.common.exception.ConflictException;
 import com.gestproj.backend.common.exception.ForbiddenException;
 import com.gestproj.backend.common.exception.ResourceNotFoundException;
+import com.gestproj.backend.common.mail.EmailService;
 import com.gestproj.backend.activitylog.service.ActivityLogService;
 import com.gestproj.backend.member.entity.ProjectMember;
 import com.gestproj.backend.member.repository.ProjectMemberRepository;
@@ -42,6 +43,7 @@ public class ProjectInvitationService {
     private final ActivityLogService activityLogService;
     private final UserService userService;
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     public ProjectInvitationService(
             ProjectInvitationRepository projectInvitationRepository,
@@ -51,7 +53,8 @@ public class ProjectInvitationService {
             NotificationService notificationService,
             ActivityLogService activityLogService,
             UserService userService,
-            UserRepository userRepository
+            UserRepository userRepository,
+            EmailService emailService
     ) {
         this.projectInvitationRepository = projectInvitationRepository;
         this.projectRepository = projectRepository;
@@ -61,6 +64,7 @@ public class ProjectInvitationService {
         this.activityLogService = activityLogService;
         this.userService = userService;
         this.userRepository = userRepository;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -112,6 +116,7 @@ public class ProjectInvitationService {
                     null
             );
         }
+        emailService.sendProjectInvitationEmail(savedInvitation);
 
         return toResponse(savedInvitation);
     }

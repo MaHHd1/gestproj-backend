@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface ProjectInvitationRepository extends JpaRepository<ProjectInvitation, Long> {
     Optional<ProjectInvitation> findByToken(String token);
     List<ProjectInvitation> findAllByProjectOrderByCreatedAtDesc(Project project);
+    void deleteAllByProject(Project project);
 }

@@ -65,10 +65,14 @@ public class TaskCommentService {
                 .toList();
     }
 
-    public TaskCommentResponse delete(Long commentId, String currentUserEmail) {
+    public TaskCommentResponse delete(Long taskId, Long commentId, String currentUserEmail) {
         User currentUser = userService.findEntityByEmail(currentUserEmail);
         TaskComment comment = taskCommentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found"));
+
+        if (!comment.getTask().getId().equals(taskId)) {
+            throw new ResourceNotFoundException("Comment not found");
+        }
 
         if (!comment.getUser().getId().equals(currentUser.getId())) {
             throw new ForbiddenException("You can only delete your own comments");

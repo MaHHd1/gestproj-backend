@@ -4,6 +4,7 @@ import com.gestproj.backend.activitylog.service.ActivityLogService;
 import com.gestproj.backend.common.enums.ProjectInvitationStatus;
 import com.gestproj.backend.common.enums.ProjectMemberRole;
 import com.gestproj.backend.common.enums.ProjectMemberStatus;
+import com.gestproj.backend.common.mail.EmailService;
 import com.gestproj.backend.member.entity.ProjectMember;
 import com.gestproj.backend.member.repository.ProjectMemberRepository;
 import com.gestproj.backend.member.service.ProjectMemberService;
@@ -58,6 +59,9 @@ class ProjectInvitationServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private ProjectInvitationService projectInvitationService;
@@ -123,6 +127,7 @@ class ProjectInvitationServiceTest {
                 any(),
                 eq(null)
         );
+        verify(emailService).sendProjectInvitationEmail(any(ProjectInvitation.class));
     }
 
     @Test
