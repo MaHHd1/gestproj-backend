@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -52,6 +53,18 @@ public class ProjectMemberController {
         Project project = getProject(projectId);
         User currentUser = userService.findEntityByEmail(authentication.getName());
         return ResponseEntity.ok(projectMemberService.updateMember(project, memberId, request, currentUser));
+    }
+
+    @DeleteMapping("/{memberId}")
+    public ResponseEntity<Void> remove(
+            @PathVariable Long projectId,
+            @PathVariable Long memberId,
+            Authentication authentication
+    ) {
+        Project project = getProject(projectId);
+        User currentUser = userService.findEntityByEmail(authentication.getName());
+        projectMemberService.removeMember(project, memberId, currentUser);
+        return ResponseEntity.noContent().build();
     }
 
     private Project getProject(Long projectId) {

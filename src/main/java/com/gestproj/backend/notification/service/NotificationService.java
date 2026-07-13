@@ -85,6 +85,7 @@ public class NotificationService {
                 notification.getCreatedAt(),
                 notification.getProject() == null ? null : notification.getProject().getId(),
                 notification.getInvitation() == null ? null : notification.getInvitation().getId(),
+                notification.getInvitation() == null ? null : notification.getInvitation().getToken(),
                 notification.getProjectMember() == null ? null : notification.getProjectMember().getId()
         );
     }

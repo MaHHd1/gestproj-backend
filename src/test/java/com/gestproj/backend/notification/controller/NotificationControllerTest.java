@@ -33,7 +33,7 @@ class NotificationControllerTest {
     void listShouldReturnNotifications() {
         when(authentication.getName()).thenReturn("user@example.com");
         when(notificationService.listForUser("user@example.com")).thenReturn(
-                List.of(new NotificationResponse(1L, NotificationType.MEMBER_UPDATED, "Title", "Message", false, LocalDateTime.now(), 1L, null, null))
+                List.of(new NotificationResponse(1L, NotificationType.MEMBER_UPDATED, "Title", "Message", false, LocalDateTime.now(), 1L, null, null, null))
         );
 
         var response = controller.list(authentication);
