@@ -124,6 +124,26 @@ public class ProjectMemberService {
         return toResponse(savedMember);
     }
 
+    public void removeMember(Project project, Long memberId, User actor) {
+        ProjectMember actorMember = projectMemberRepository.findByProjectAndUser(project, actor)
+                .orElseThrow(() -> new ForbiddenException("You are not a member of this project"));
+        if (actorMember.getStatus() != ProjectMemberStatus.ACTIVE
+                || (actorMember.getRole() != ProjectMemberRole.OWNER && !actorMember.isCanManageMembers())) {
+            throw new ForbiddenException("You are not allowed to manage project members");
+        }
+
+        ProjectMember member = projectMemberRepository.findById(memberId)
+                .filter(existing -> existing.getProject().getId().equals(project.getId()))
+                .orElseThrow(() -> new ResourceNotFoundException("Project member not found"));
+        if (member.getRole() == ProjectMemberRole.OWNER) {
+            throw new ForbiddenException("Project owner cannot be removed");
+        }
+
+        String username = member.getUser().getUsername();
+        projectMemberRepository.delete(member);
+        activityLogService.log(project, actor, "Removed member " + username);
+    }
+
     public ProjectMember findProjectMember(Project project, User user) {
         return projectMemberRepository.findByProjectAndUserAndStatus(project, user, ProjectMemberStatus.ACTIVE)
                 .orElseThrow(() -> new ResourceNotFoundException("Project member not found"));

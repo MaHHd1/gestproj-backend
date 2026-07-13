@@ -93,6 +93,7 @@ public class ProjectService {
         return toResponse(project);
     }
 
+    @Transactional(readOnly = true)
     public ProjectStatisticsResponse getStatistics(Long projectId, String currentUserEmail) {
         User currentUser = userService.findEntityByEmail(currentUserEmail);
         Project project = projectRepository.findById(projectId)

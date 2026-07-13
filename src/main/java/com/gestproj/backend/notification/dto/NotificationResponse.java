@@ -13,6 +13,7 @@ public record NotificationResponse(
         LocalDateTime createdAt,
         Long projectId,
         Long invitationId,
+        String invitationToken,
         Long projectMemberId
 ) {
 }

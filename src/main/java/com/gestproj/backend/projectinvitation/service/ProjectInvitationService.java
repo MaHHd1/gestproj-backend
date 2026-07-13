@@ -143,6 +143,10 @@ public class ProjectInvitationService {
 
         Project project = invitation.getProject();
         if (projectMemberRepository.existsByProjectAndUser(project, actor)) {
+            ProjectMember existingMember = projectMemberRepository.findByProjectAndUser(project, actor)
+                    .orElseThrow();
+            existingMember.setStatus(ProjectMemberStatus.ACTIVE);
+            projectMemberRepository.save(existingMember);
             invitation.setStatus(ProjectInvitationStatus.ACCEPTED);
             ProjectInvitation savedInvitation = projectInvitationRepository.save(invitation);
             activityLogService.log(project, actor, "Accepted invitation");
@@ -215,9 +219,11 @@ public class ProjectInvitationService {
     public ProjectInvitationResponse getByToken(String token, String actorEmail) {
         ProjectInvitation invitation = getInvitation(token);
         User actor = userService.findEntityByEmail(actorEmail);
-        ProjectMember actorMember = projectMemberService.findProjectMember(invitation.getProject(), actor);
 
-        if (actorMember == null) {
+        boolean isInvitedUser = invitation.getInvitedEmail() != null
+                && invitation.getInvitedEmail().equalsIgnoreCase(actor.getEmail());
+        boolean isProjectMember = projectMemberRepository.existsByProjectAndUser(invitation.getProject(), actor);
+        if (!isInvitedUser && !isProjectMember) {
             throw new ForbiddenException("You are not allowed to view this invitation");
         }
 
