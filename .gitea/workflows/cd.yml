@@ -1,0 +1,21 @@
+name: CD - Validation du build Docker
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    needs: []
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Construire l'image Docker
+        run: docker build -t gestproj-backend:ci-check .
+
+      - name: Confirmer que l'image a ete creee
+        run: docker images gestproj-backend:ci-check
