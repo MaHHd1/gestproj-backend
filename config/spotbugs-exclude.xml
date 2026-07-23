@@ -14,4 +14,13 @@
     <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
     <Class name="~com\.gestproj\.backend\.(activitylog\.controller\.ActivityLogController|activitylog\.service\.ActivityLogService|member\.controller\.ProjectMemberController|member\.service\.ProjectMemberService|notification\.service\.NotificationService|project\.controller\.ProjectController|project\.service\.ProjectService|projectinvitation\.service\.ProjectInvitationService|task\.controller\.(ProjectTaskController|TaskCommentController|TaskController)|task\.service\.(TaskCommentService|TaskSchedulerService|TaskService))"/>
   </Match>
+
+  <!--
+    JwtService is final, so a validation failure while constructing its HMAC key cannot be
+    exploited through a subclass finalizer. SpotBugs reports CT_CONSTRUCTOR_THROW regardless.
+  -->
+  <Match>
+    <Bug pattern="CT_CONSTRUCTOR_THROW"/>
+    <Class name="com.gestproj.backend.auth.jwt.JwtService"/>
+  </Match>
 </FindBugsFilter>
