@@ -59,6 +59,7 @@ class DeploymentServiceTest {
     member.setProject(project);
     member.setUser(user);
     member.setCanViewProject(true);
+    member.setCanCreateTask(true);
     ReflectionTestUtils.setField(member, "id", 7L);
 
     when(projectRepository.findById(5L)).thenReturn(java.util.Optional.of(project));
@@ -96,6 +97,7 @@ class DeploymentServiceTest {
     member2.setProject(project2);
     member2.setUser(actor2);
     member2.setCanViewProject(true);
+    member2.setCanCreateTask(true);
 
     when(projectRepository.findById(6L)).thenReturn(java.util.Optional.of(project2));
     when(userService.findEntityByEmail("actor2@example.com")).thenReturn(actor2);
