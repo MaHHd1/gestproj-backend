@@ -20,6 +20,7 @@ import com.gestproj.backend.user.service.UserService;
 import com.gestproj.backend.activitylog.service.ActivityLogService;
 import com.gestproj.backend.notification.service.NotificationService;
 import com.gestproj.backend.common.enums.NotificationType;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @Service
 public class DeploymentService {
@@ -30,8 +31,6 @@ public class DeploymentService {
   private final UserService userService;
   private final ActivityLogService activityLogService;
   private final NotificationService notificationService;
-
-  import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
     @SuppressFBWarnings("EI_EXPOSE_REP2")
     public DeploymentService(
