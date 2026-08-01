@@ -69,7 +69,9 @@ public class GiteaClient {
                   try {
                     date = OffsetDateTime.parse(author.get("date").asText());
                   } catch (Exception e) {
-                    // ignore parsing errors
+                    if (log.isDebugEnabled()) {
+                      log.debug("Failed to parse commit author date: {}", e.toString(), e);
+                    }
                   }
                 }
               }
@@ -79,11 +81,15 @@ public class GiteaClient {
         }
         return commits;
       } else {
-        log.warn("Gitea returned status {} for {} / {}", resp.statusCode(), owner, repo);
+        if (log.isWarnEnabled()) {
+          log.warn("Gitea returned status {} for {}/{}", resp.statusCode(), owner, repo);
+        }
         return List.of();
       }
     } catch (IOException | InterruptedException e) {
-      log.warn("Failed to fetch commits from Gitea: {}", e.toString());
+      if (log.isWarnEnabled()) {
+        log.warn("Failed to fetch commits from Gitea", e);
+      }
       return List.of();
     }
   }
