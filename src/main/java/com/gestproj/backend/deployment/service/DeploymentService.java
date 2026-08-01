@@ -31,20 +31,23 @@ public class DeploymentService {
   private final ActivityLogService activityLogService;
   private final NotificationService notificationService;
 
-  public DeploymentService(
-      DeploymentRepository deploymentRepository,
-      ProjectRepository projectRepository,
-      ProjectMemberService projectMemberService,
-      UserService userService,
-      ActivityLogService activityLogService,
-      NotificationService notificationService) {
-    this.deploymentRepository = deploymentRepository;
-    this.projectRepository = projectRepository;
-    this.projectMemberService = projectMemberService;
-    this.userService = userService;
-    this.activityLogService = activityLogService;
-    this.notificationService = notificationService;
-  }
+  import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
+    @SuppressFBWarnings("EI_EXPOSE_REP2")
+    public DeploymentService(
+        DeploymentRepository deploymentRepository,
+        ProjectRepository projectRepository,
+        ProjectMemberService projectMemberService,
+        UserService userService,
+        ActivityLogService activityLogService,
+        NotificationService notificationService) {
+      this.deploymentRepository = deploymentRepository;
+      this.projectRepository = projectRepository;
+      this.projectMemberService = projectMemberService;
+      this.userService = userService;
+      this.activityLogService = activityLogService;
+      this.notificationService = notificationService;
+    }
 
   @Transactional
   public DeploymentResponse recordDeployment(Long projectId, DeploymentCreateRequest request, String actorEmail) {

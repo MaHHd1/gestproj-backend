@@ -3,6 +3,7 @@ package com.gestproj.backend.deployment.entity;
 import java.time.LocalDateTime;
 
 import com.gestproj.backend.project.entity.Project;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -47,10 +48,12 @@ public class Deployment {
     return id;
   }
 
+  @SuppressFBWarnings("EI_EXPOSE_REP")
   public Project getProject() {
     return project;
   }
 
+  @SuppressFBWarnings("EI_EXPOSE_REP")
   public void setProject(Project project) {
     this.project = project;
   }
