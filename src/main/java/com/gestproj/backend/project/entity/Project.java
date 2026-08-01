@@ -30,6 +30,12 @@ public class Project {
   @Column(columnDefinition = "text")
   private String description;
 
+  @Column(name = "repo_owner")
+  private String repoOwner;
+
+  @Column(name = "repo_name")
+  private String repoName;
+
   @ManyToOne(optional = false)
   @JoinColumn(name = "owner_id", nullable = false)
   private User owner;
@@ -55,6 +61,22 @@ public class Project {
 
   public void setDescription(String description) {
     this.description = description;
+  }
+
+  public String getRepoOwner() {
+    return repoOwner;
+  }
+
+  public void setRepoOwner(String repoOwner) {
+    this.repoOwner = repoOwner;
+  }
+
+  public String getRepoName() {
+    return repoName;
+  }
+
+  public void setRepoName(String repoName) {
+    this.repoName = repoName;
   }
 
   public User getOwner() {

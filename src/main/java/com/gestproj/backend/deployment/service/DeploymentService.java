@@ -1,0 +1,98 @@
+package com.gestproj.backend.deployment.service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.gestproj.backend.deployment.dto.DeploymentCreateRequest;
+import com.gestproj.backend.deployment.dto.DeploymentResponse;
+import com.gestproj.backend.deployment.entity.Deployment;
+import com.gestproj.backend.deployment.repository.DeploymentRepository;
+import com.gestproj.backend.member.entity.ProjectMember;
+import com.gestproj.backend.member.service.ProjectMemberService;
+import com.gestproj.backend.project.entity.Project;
+import com.gestproj.backend.project.repository.ProjectRepository;
+import com.gestproj.backend.common.exception.ForbiddenException;
+import com.gestproj.backend.common.exception.ResourceNotFoundException;
+import com.gestproj.backend.user.service.UserService;
+
+@Service
+public class DeploymentService {
+
+  private final DeploymentRepository deploymentRepository;
+  private final ProjectRepository projectRepository;
+  private final ProjectMemberService projectMemberService;
+  private final UserService userService;
+
+  public DeploymentService(
+      DeploymentRepository deploymentRepository,
+      ProjectRepository projectRepository,
+      ProjectMemberService projectMemberService,
+      UserService userService) {
+    this.deploymentRepository = deploymentRepository;
+    this.projectRepository = projectRepository;
+    this.projectMemberService = projectMemberService;
+    this.userService = userService;
+  }
+
+  @Transactional
+  public DeploymentResponse recordDeployment(Long projectId, DeploymentCreateRequest request, String actorEmail) {
+    Project project = getAccessibleProject(projectId, actorEmail, true);
+
+    Deployment d = new Deployment();
+    d.setProject(project);
+    d.setStatus(request.status());
+    d.setCommitHash(request.commitHash());
+    d.setCommitMessage(request.commitMessage());
+    d.setTriggeredBy(request.triggeredBy());
+    LocalDateTime now = LocalDateTime.now();
+    d.setStartedAt(now);
+    d.setFinishedAt(now);
+
+    Deployment saved = deploymentRepository.save(d);
+
+    return toResponse(saved);
+  }
+
+  @Transactional(readOnly = true)
+  public List<DeploymentResponse> getDeployments(Long projectId, String actorEmail) {
+    Project project = getAccessibleProject(projectId, actorEmail, false);
+    return deploymentRepository.findAllByProjectIdOrderByFinishedAtDesc(project.getId()).stream()
+        .map(this::toResponse)
+        .toList();
+  }
+
+  private DeploymentResponse toResponse(Deployment d) {
+    return new DeploymentResponse(
+        d.getId(),
+        d.getProject().getId(),
+        d.getStatus(),
+        d.getCommitHash(),
+        d.getCommitMessage(),
+        d.getTriggeredBy(),
+        d.getStartedAt(),
+        d.getFinishedAt());
+  }
+
+  private Project getAccessibleProject(Long projectId, String actorEmail, boolean needWriteAccess) {
+    Project project =
+        projectRepository.findById(projectId).orElseThrow(() -> new ResourceNotFoundException("Project not found"));
+    ProjectMember actorMember = getMember(project, actorEmail);
+
+    if (!actorMember.isCanViewProject() && actorMember.getRole() != com.gestproj.backend.common.enums.ProjectMemberRole.OWNER) {
+      throw new ForbiddenException("You are not allowed to access this project");
+    }
+
+    if (needWriteAccess && !actorMember.isCanCreateTask() && actorMember.getRole() != com.gestproj.backend.common.enums.ProjectMemberRole.OWNER) {
+      throw new ForbiddenException("You are not allowed to create deployments in this project");
+    }
+
+    return project;
+  }
+
+  private ProjectMember getMember(Project project, String actorEmail) {
+    return projectMemberService.findProjectMember(project, userService.findEntityByEmail(actorEmail));
+  }
+}

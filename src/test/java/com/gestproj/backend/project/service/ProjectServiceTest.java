@@ -58,11 +58,13 @@ class ProjectServiceTest {
 
     var response =
         projectService.create(
-            new ProjectCreateRequest("Team Board", "Main project"), "owner@example.com");
+            new ProjectCreateRequest("Team Board", "Main project", "ownerOrg", "ownerRepo"), "owner@example.com");
 
     assertEquals(10L, response.id());
     assertEquals(1L, response.ownerId());
     assertEquals("owner", response.ownerUsername());
+    assertEquals("ownerOrg", response.repoOwner());
+    assertEquals("ownerRepo", response.repoName());
     verify(projectMemberService)
         .addMember(any(Project.class), eq(owner), eq(ProjectMemberRole.OWNER));
     verify(activityLogService).log(any(Project.class), eq(owner), eq("Created project"));
@@ -87,7 +89,7 @@ class ProjectServiceTest {
         () ->
             projectService.update(
                 10L,
-                new com.gestproj.backend.project.dto.ProjectUpdateRequest("Updated", "Desc"),
+                new com.gestproj.backend.project.dto.ProjectUpdateRequest("Updated", "Desc", null, null),
                 "user@example.com"));
   }
 
