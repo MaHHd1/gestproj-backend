@@ -17,6 +17,9 @@ import com.gestproj.backend.project.repository.ProjectRepository;
 import com.gestproj.backend.common.exception.ForbiddenException;
 import com.gestproj.backend.common.exception.ResourceNotFoundException;
 import com.gestproj.backend.user.service.UserService;
+import com.gestproj.backend.activitylog.service.ActivityLogService;
+import com.gestproj.backend.notification.service.NotificationService;
+import com.gestproj.backend.common.enums.NotificationType;
 
 @Service
 public class DeploymentService {
@@ -25,16 +28,22 @@ public class DeploymentService {
   private final ProjectRepository projectRepository;
   private final ProjectMemberService projectMemberService;
   private final UserService userService;
+  private final ActivityLogService activityLogService;
+  private final NotificationService notificationService;
 
   public DeploymentService(
       DeploymentRepository deploymentRepository,
       ProjectRepository projectRepository,
       ProjectMemberService projectMemberService,
-      UserService userService) {
+      UserService userService,
+      ActivityLogService activityLogService,
+      NotificationService notificationService) {
     this.deploymentRepository = deploymentRepository;
     this.projectRepository = projectRepository;
     this.projectMemberService = projectMemberService;
     this.userService = userService;
+    this.activityLogService = activityLogService;
+    this.notificationService = notificationService;
   }
 
   @Transactional
@@ -52,6 +61,23 @@ public class DeploymentService {
     d.setFinishedAt(now);
 
     Deployment saved = deploymentRepository.save(d);
+
+    // Log activity
+    var actor = userService.findEntityByEmail(actorEmail);
+    if ("SUCCESS".equalsIgnoreCase(saved.getStatus())) {
+      activityLogService.log(project, actor, "Deployment succeeded: " + saved.getCommitMessage());
+    } else if ("FAILURE".equalsIgnoreCase(saved.getStatus())) {
+      activityLogService.log(project, actor, "Deployment failed: " + saved.getCommitMessage());
+      // Notify project owner about failure
+      notificationService.notify(
+          project.getOwner(),
+          NotificationType.DEPLOYMENT_FAILED,
+          "Deployment failed",
+          "Deployment failed: " + saved.getCommitMessage(),
+          project,
+          null,
+          null);
+    }
 
     return toResponse(saved);
   }
