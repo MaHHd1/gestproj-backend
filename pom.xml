@@ -122,7 +122,7 @@
 		<dependency>
 			<groupId>com.github.spotbugs</groupId>
 			<artifactId>spotbugs-annotations</artifactId>
-			<version>4.7.3.0</version>
+			<version>4.7.3</version>
 		</dependency>
 	</dependencies>
 
@@ -206,6 +206,7 @@
 					<rulesets>
 						<ruleset>rulesets/java/quickstart.xml</ruleset>
 					</rulesets>
+					<outputFormat>xdoc</outputFormat>
 					<failOnViolation>true</failOnViolation>
 					<printFailingErrors>true</printFailingErrors>
 				</configuration>

@@ -6,13 +6,13 @@
   -->
   <Match>
     <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
-    <Class name="~com\.gestproj\.backend\.(activitylog\.entity\.ActivityLog|member\.entity\.ProjectMember|notification\.entity\.Notification|project\.entity\.Project|projectinvitation\.entity\.ProjectInvitation|task\.entity\.(Task|TaskComment))"/>
+    <Class name="~com\.gestproj\.backend\.(activitylog\.entity\.ActivityLog|member\.entity\.ProjectMember|notification\.entity\.Notification|project\.entity\.Project|projectinvitation\.entity\.ProjectInvitation|task\.entity\.(Task|TaskComment)|deployment\.entity\.Deployment)"/>
   </Match>
 
   <!-- Spring injects shared collaborators; retaining those references is intentional. -->
   <Match>
     <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
-    <Class name="~com\.gestproj\.backend\.(activitylog\.controller\.ActivityLogController|activitylog\.service\.ActivityLogService|member\.controller\.ProjectMemberController|member\.service\.ProjectMemberService|notification\.service\.NotificationService|project\.controller\.ProjectController|project\.service\.ProjectService|projectinvitation\.service\.ProjectInvitationService|task\.controller\.(ProjectTaskController|TaskCommentController|TaskController)|task\.service\.(TaskCommentService|TaskSchedulerService|TaskService))"/>
+    <Class name="~com\.gestproj\.backend\.(activitylog\.controller\.ActivityLogController|activitylog\.service\.ActivityLogService|member\.controller\.ProjectMemberController|member\.service\.ProjectMemberService|notification\.service\.NotificationService|project\.controller\.(ProjectController|ProjectCommitsController)|project\.service\.ProjectService|projectinvitation\.service\.ProjectInvitationService|task\.controller\.(ProjectTaskController|TaskCommentController|TaskController)|task\.service\.(TaskCommentService|TaskSchedulerService|TaskService)|deployment\.service\.DeploymentService)"/>
   </Match>
 
   <!--

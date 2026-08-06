@@ -23,6 +23,7 @@ import com.gestproj.backend.common.enums.NotificationType;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @Service
+@SuppressFBWarnings("EI_EXPOSE_REP2")
 public class DeploymentService {
 
   private final DeploymentRepository deploymentRepository;

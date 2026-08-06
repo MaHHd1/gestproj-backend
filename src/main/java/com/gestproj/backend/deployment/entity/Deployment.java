@@ -16,6 +16,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "deployments")
+@SuppressFBWarnings("EI_EXPOSE_REP")
 public class Deployment {
 
   @Id
