@@ -61,7 +61,7 @@ public class DeploymentService {
     d.setTriggeredBy(request.triggeredBy());
     LocalDateTime now = LocalDateTime.now();
     d.setStartedAt(now);
-    d.setFinishedAt(now);
+    d.setFinishedAt(isTerminalStatus(request.status()) ? now : null);
 
     Deployment saved = deploymentRepository.save(d);
 
@@ -103,6 +103,10 @@ public class DeploymentService {
         d.getTriggeredBy(),
         d.getStartedAt(),
         d.getFinishedAt());
+  }
+
+  private boolean isTerminalStatus(String status) {
+    return "SUCCESS".equalsIgnoreCase(status) || "FAILURE".equalsIgnoreCase(status);
   }
 
   private Project getAccessibleProject(Long projectId, String actorEmail, boolean needWriteAccess) {
