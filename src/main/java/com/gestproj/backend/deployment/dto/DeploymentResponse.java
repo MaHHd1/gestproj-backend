@@ -10,4 +10,10 @@ public record DeploymentResponse(
     String commitMessage,
     String triggeredBy,
     LocalDateTime startedAt,
-    LocalDateTime finishedAt) {}
+    LocalDateTime finishedAt,
+    String workflowName,
+    String workflowRunId,
+    String workflowUrl,
+    String deploymentTarget,
+    String dockerStatus,
+    String dockerDetails) {}

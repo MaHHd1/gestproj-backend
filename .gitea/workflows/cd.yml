@@ -48,8 +48,8 @@ jobs:
 
       - name: Record deployment success
         if: success()
-        run: docker exec postgres psql -U admin -d gestproj -c "INSERT INTO deployments (project_id, status, commit_hash, commit_message, triggered_by, started_at, finished_at) VALUES (1, 'SUCCESS', '${{ github.sha }}', 'Backend deployed by Gitea Actions', '${{ github.actor }}', NOW(), NOW());"
+        run: docker exec postgres psql -U admin -d gestproj -c "INSERT INTO deployments (project_id, status, commit_hash, commit_message, triggered_by, started_at, finished_at, workflow_name, workflow_run_id, deployment_target, docker_status, docker_details) VALUES (1, 'SUCCESS', '${{ github.sha }}', 'Backend deployed by Gitea Actions', '${{ github.actor }}', NOW(), NOW(), 'CD - Deploy backend', '${{ github.run_id }}', '100.83.8.6 / backend', 'HEALTHY', 'Container health endpoint responded successfully');"
 
       - name: Record deployment failure
         if: failure()
-        run: docker exec postgres psql -U admin -d gestproj -c "INSERT INTO deployments (project_id, status, commit_hash, commit_message, triggered_by, started_at, finished_at) VALUES (1, 'FAILURE', '${{ github.sha }}', 'Backend deployment failed in Gitea Actions', '${{ github.actor }}', NOW(), NOW());"
+        run: docker exec postgres psql -U admin -d gestproj -c "INSERT INTO deployments (project_id, status, commit_hash, commit_message, triggered_by, started_at, finished_at, workflow_name, workflow_run_id, deployment_target, docker_status, docker_details) VALUES (1, 'FAILURE', '${{ github.sha }}', 'Backend deployment failed in Gitea Actions', '${{ github.actor }}', NOW(), NOW(), 'CD - Deploy backend', '${{ github.run_id }}', '100.83.8.6 / backend', 'UNHEALTHY', 'Workflow failed before the backend health check completed');"

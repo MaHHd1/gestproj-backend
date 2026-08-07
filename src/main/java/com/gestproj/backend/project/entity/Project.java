@@ -36,6 +36,12 @@ public class Project {
   @Column(name = "repo_name")
   private String repoName;
 
+  @Column(name = "deployment_host")
+  private String deploymentHost;
+
+  @Column(name = "deployment_container")
+  private String deploymentContainer;
+
   @ManyToOne(optional = false)
   @JoinColumn(name = "owner_id", nullable = false)
   private User owner;
@@ -78,6 +84,11 @@ public class Project {
   public void setRepoName(String repoName) {
     this.repoName = repoName;
   }
+
+  public String getDeploymentHost() { return deploymentHost; }
+  public void setDeploymentHost(String deploymentHost) { this.deploymentHost = deploymentHost; }
+  public String getDeploymentContainer() { return deploymentContainer; }
+  public void setDeploymentContainer(String deploymentContainer) { this.deploymentContainer = deploymentContainer; }
 
   public User getOwner() {
     return owner;

@@ -7,4 +7,10 @@ public record ProjectResponse(
     Long ownerId,
     String ownerUsername,
     String repoOwner,
-    String repoName) {}
+    String repoName,
+    String deploymentHost,
+    String deploymentContainer) {
+  public ProjectResponse(Long id, String name, String description, Long ownerId, String ownerUsername, String repoOwner, String repoName) {
+    this(id, name, description, ownerId, ownerUsername, repoOwner, repoName, null, null);
+  }
+}

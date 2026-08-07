@@ -45,6 +45,24 @@ public class Deployment {
   @Column(name = "finished_at")
   private LocalDateTime finishedAt;
 
+  @Column(name = "workflow_name")
+  private String workflowName;
+
+  @Column(name = "workflow_run_id")
+  private String workflowRunId;
+
+  @Column(name = "workflow_url", length = 1000)
+  private String workflowUrl;
+
+  @Column(name = "deployment_target")
+  private String deploymentTarget;
+
+  @Column(name = "docker_status")
+  private String dockerStatus;
+
+  @Column(name = "docker_details", columnDefinition = "text")
+  private String dockerDetails;
+
   public Long getId() {
     return id;
   }
@@ -106,4 +124,17 @@ public class Deployment {
   public void setFinishedAt(LocalDateTime finishedAt) {
     this.finishedAt = finishedAt;
   }
+
+  public String getWorkflowName() { return workflowName; }
+  public void setWorkflowName(String workflowName) { this.workflowName = workflowName; }
+  public String getWorkflowRunId() { return workflowRunId; }
+  public void setWorkflowRunId(String workflowRunId) { this.workflowRunId = workflowRunId; }
+  public String getWorkflowUrl() { return workflowUrl; }
+  public void setWorkflowUrl(String workflowUrl) { this.workflowUrl = workflowUrl; }
+  public String getDeploymentTarget() { return deploymentTarget; }
+  public void setDeploymentTarget(String deploymentTarget) { this.deploymentTarget = deploymentTarget; }
+  public String getDockerStatus() { return dockerStatus; }
+  public void setDockerStatus(String dockerStatus) { this.dockerStatus = dockerStatus; }
+  public String getDockerDetails() { return dockerDetails; }
+  public void setDockerDetails(String dockerDetails) { this.dockerDetails = dockerDetails; }
 }

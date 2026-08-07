@@ -62,6 +62,12 @@ public class DeploymentService {
     LocalDateTime now = LocalDateTime.now();
     d.setStartedAt(now);
     d.setFinishedAt(isTerminalStatus(request.status()) ? now : null);
+    d.setWorkflowName(request.workflowName());
+    d.setWorkflowRunId(request.workflowRunId());
+    d.setWorkflowUrl(request.workflowUrl());
+    d.setDeploymentTarget(request.deploymentTarget());
+    d.setDockerStatus(request.dockerStatus());
+    d.setDockerDetails(request.dockerDetails());
 
     Deployment saved = deploymentRepository.save(d);
 
@@ -102,7 +108,8 @@ public class DeploymentService {
         d.getCommitMessage(),
         d.getTriggeredBy(),
         d.getStartedAt(),
-        d.getFinishedAt());
+        d.getFinishedAt(), d.getWorkflowName(), d.getWorkflowRunId(), d.getWorkflowUrl(),
+        d.getDeploymentTarget(), d.getDockerStatus(), d.getDockerDetails());
   }
 
   private boolean isTerminalStatus(String status) {
