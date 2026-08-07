@@ -1,0 +1,4 @@
+container:
+  network: infra_infra_net
+  volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
