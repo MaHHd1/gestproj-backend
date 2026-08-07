@@ -31,9 +31,3 @@ jobs:
       - name: Executer les tests
         run: ./mvnw test
 
-      - name: Publier les resultats de tests
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: rapport-tests
-          path: target/surefire-reports/
