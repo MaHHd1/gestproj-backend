@@ -3430,7 +3430,51 @@ Chaque utilisateur peut choisir les événements qui génèrent des notification
 - rappels d'échéance ;
 - changements de statut.
 
-## 32. Conclusion
+## 32. Deployment and server observability
+
+### 32.1 Objective
+
+Projects can now be linked to a Gitea repository and a deployment target, while the frontend can show their deployment history. This feature makes the deployed service's operational status visible without replacing the CI/CD tooling.
+
+### 32.2 Added data
+
+The Flyway migrations add:
+
+- `projects.repo_owner` and `projects.repo_name` for the optional Gitea repository;
+- `projects.deployment_host` and `projects.deployment_container` for the server target and container;
+- the `deployments` table for execution history;
+- observability fields: `workflow_name`, `workflow_run_id`, `workflow_url`, `deployment_target`, `docker_status`, and `docker_details`.
+
+The relevant migrations are `V3__add_project_repo_columns.sql`, `V4__create_deployments_table.sql`, and `V5__add_deployment_observability.sql`.
+
+### 32.3 API and access control
+
+```text
+GET  /projects/{projectId}/commits
+GET  /projects/{projectId}/deployments
+POST /projects/{projectId}/deployments
+```
+
+- Commits are read from Gitea only when both `repoOwner` and `repoName` are configured.
+- Deployment listing requires an active project member with project-view access.
+- Recording a deployment requires the owner or task-creation permission.
+- A `FAILURE` deployment creates a `DEPLOYMENT_FAILED` notification for the project owner and an activity-log entry. Successful deployments are also logged.
+
+A deployment response contains its status (`QUEUED`, `RUNNING`, `SUCCESS`, or `FAILURE`), commit information, trigger, start/finish dates, workflow metadata, target, and Docker status/details.
+
+### 32.4 Server and CI/CD changes
+
+The Docker profile connects to PostgreSQL through the containers' internal network. The backend Gitea Actions workflow:
+
+1. runs quality checks;
+2. builds the Docker image;
+3. replaces the `backend` container on `infra_infra_net`;
+4. waits for `GET /actuator/health` to succeed;
+5. records the result and health state in the `deployments` table.
+
+The deployed frontend origin `http://100.83.8.6:4200` is allowed by CORS. Any additional production origin must be explicitly added to the security configuration. Gitea integration is configured with `GITEA_BASE_URL` and, when needed, `GITEA_TOKEN`.
+
+## 33. Conclusion
 
 Le backend GestProj fournit une base complète pour une application collaborative de gestion de projets. Il couvre les besoins essentiels d'authentification, de gestion de projets, de gestion des membres, de suivi des tâches, de collaboration par commentaires, de notifications et de traçabilité.
 
