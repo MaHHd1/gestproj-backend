@@ -23,7 +23,7 @@ import com.gestproj.backend.project.service.ProjectService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/projects")
+@RequestMapping("/api/projects")
 public class ProjectController {
 
   private final ProjectService projectService;

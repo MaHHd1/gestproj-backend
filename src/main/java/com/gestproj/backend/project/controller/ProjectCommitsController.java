@@ -19,7 +19,7 @@ import com.gestproj.backend.user.service.UserService;
 import com.gestproj.backend.member.service.ProjectMemberService;
 
 @RestController
-@RequestMapping("/projects/{projectId}/commits")
+@RequestMapping("/api/projects/{projectId}/commits")
 public class ProjectCommitsController {
 
   private static final Logger log = LoggerFactory.getLogger(ProjectCommitsController.class);

@@ -19,7 +19,7 @@ import com.gestproj.backend.deployment.service.DeploymentService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/projects/{projectId}/deployments")
+@RequestMapping("/api/projects/{projectId}/deployments")
 public class DeploymentController {
 
   private final DeploymentService deploymentService;
