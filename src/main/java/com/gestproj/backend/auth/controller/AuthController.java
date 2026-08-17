@@ -18,7 +18,7 @@ import com.gestproj.backend.user.dto.UserResponse;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/auth")
 public class AuthController {
 
   private final AuthService authService;
