@@ -58,7 +58,8 @@ class ProjectServiceTest {
 
     var response =
         projectService.create(
-            new ProjectCreateRequest("Team Board", "Main project", "ownerOrg", "ownerRepo"), "owner@example.com");
+            new ProjectCreateRequest("Team Board", "Main project", "ownerOrg", "ownerRepo"),
+            "owner@example.com");
 
     assertEquals(10L, response.id());
     assertEquals(1L, response.ownerId());
@@ -89,7 +90,8 @@ class ProjectServiceTest {
         () ->
             projectService.update(
                 10L,
-                new com.gestproj.backend.project.dto.ProjectUpdateRequest("Updated", "Desc", null, null),
+                new com.gestproj.backend.project.dto.ProjectUpdateRequest(
+                    "Updated", "Desc", null, null),
                 "user@example.com"));
   }
 

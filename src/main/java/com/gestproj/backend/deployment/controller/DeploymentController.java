@@ -38,7 +38,8 @@ public class DeploymentController {
   }
 
   @GetMapping
-  public ResponseEntity<List<DeploymentResponse>> list(@PathVariable Long projectId, Authentication authentication) {
+  public ResponseEntity<List<DeploymentResponse>> list(
+      @PathVariable Long projectId, Authentication authentication) {
     return ResponseEntity.ok(deploymentService.getDeployments(projectId, authentication.getName()));
   }
 }

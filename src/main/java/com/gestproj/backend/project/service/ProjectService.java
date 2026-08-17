@@ -150,8 +150,10 @@ public class ProjectService {
     project.setDescription(request.description() == null ? null : request.description().trim());
     project.setRepoOwner(request.repoOwner() == null ? null : request.repoOwner().trim());
     project.setRepoName(request.repoName() == null ? null : request.repoName().trim());
-    project.setDeploymentHost(request.deploymentHost() == null ? null : request.deploymentHost().trim());
-    project.setDeploymentContainer(request.deploymentContainer() == null ? null : request.deploymentContainer().trim());
+    project.setDeploymentHost(
+        request.deploymentHost() == null ? null : request.deploymentHost().trim());
+    project.setDeploymentContainer(
+        request.deploymentContainer() == null ? null : request.deploymentContainer().trim());
     Project savedProject = projectRepository.save(project);
     activityLogService.log(savedProject, currentUser, "Updated project");
     return toResponse(savedProject);
@@ -185,6 +187,8 @@ public class ProjectService {
         project.getOwner().getId(),
         project.getOwner().getUsername(),
         project.getRepoOwner(),
-        project.getRepoName(), project.getDeploymentHost(), project.getDeploymentContainer());
+        project.getRepoName(),
+        project.getDeploymentHost(),
+        project.getDeploymentContainer());
   }
 }

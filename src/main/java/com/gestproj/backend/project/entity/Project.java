@@ -85,10 +85,21 @@ public class Project {
     this.repoName = repoName;
   }
 
-  public String getDeploymentHost() { return deploymentHost; }
-  public void setDeploymentHost(String deploymentHost) { this.deploymentHost = deploymentHost; }
-  public String getDeploymentContainer() { return deploymentContainer; }
-  public void setDeploymentContainer(String deploymentContainer) { this.deploymentContainer = deploymentContainer; }
+  public String getDeploymentHost() {
+    return deploymentHost;
+  }
+
+  public void setDeploymentHost(String deploymentHost) {
+    this.deploymentHost = deploymentHost;
+  }
+
+  public String getDeploymentContainer() {
+    return deploymentContainer;
+  }
+
+  public void setDeploymentContainer(String deploymentContainer) {
+    this.deploymentContainer = deploymentContainer;
+  }
 
   public User getOwner() {
     return owner;

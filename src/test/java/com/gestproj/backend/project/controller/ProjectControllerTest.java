@@ -36,7 +36,8 @@ class ProjectControllerTest {
         .thenReturn(new ProjectResponse(1L, "Alpha", "Main project", 2L, "owner", "org", "repo"));
 
     var response =
-        projectController.create(new ProjectCreateRequest("Alpha", "Main project", "org", "repo"), authentication);
+        projectController.create(
+            new ProjectCreateRequest("Alpha", "Main project", "org", "repo"), authentication);
 
     assertEquals(HttpStatus.CREATED, response.getStatusCode());
     assertEquals("Alpha", response.getBody().name());
@@ -46,7 +47,8 @@ class ProjectControllerTest {
   void listShouldReturnProjects() {
     when(authentication.getName()).thenReturn("owner@example.com");
     when(projectService.getProjectsForCurrentUser("owner@example.com"))
-        .thenReturn(List.of(new ProjectResponse(1L, "Alpha", "Main project", 2L, "owner", "org", "repo")));
+        .thenReturn(
+            List.of(new ProjectResponse(1L, "Alpha", "Main project", 2L, "owner", "org", "repo")));
 
     var response = projectController.list(authentication);
 
@@ -61,7 +63,8 @@ class ProjectControllerTest {
         .thenReturn(new ProjectResponse(1L, "Beta", "Updated", 2L, "owner", null, null));
 
     var response =
-        projectController.update(1L, new ProjectUpdateRequest("Beta", "Updated", null, null), authentication);
+        projectController.update(
+            1L, new ProjectUpdateRequest("Beta", "Updated", null, null), authentication);
 
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertEquals("Beta", response.getBody().name());

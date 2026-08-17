@@ -1,7 +1,6 @@
 package com.gestproj.backend.project.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.OffsetDateTime;
@@ -16,11 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import com.gestproj.backend.gitea.GiteaClient;
+import com.gestproj.backend.member.entity.ProjectMember;
+import com.gestproj.backend.member.service.ProjectMemberService;
 import com.gestproj.backend.project.dto.CommitResponse;
 import com.gestproj.backend.project.entity.Project;
 import com.gestproj.backend.project.repository.ProjectRepository;
-import com.gestproj.backend.member.entity.ProjectMember;
-import com.gestproj.backend.member.service.ProjectMemberService;
 import com.gestproj.backend.user.entity.User;
 import com.gestproj.backend.user.service.UserService;
 
@@ -64,8 +63,8 @@ class ProjectCommitsControllerTest {
     User user = new User();
     when(userService.findEntityByEmail("user@example.com")).thenReturn(user);
     when(projectMemberService.findProjectMember(project, user)).thenReturn(new ProjectMember());
-    when(giteaClient.getCommits("org", "repo")).thenReturn(
-        List.of(new CommitResponse("sha1", "msg", "author", OffsetDateTime.now())));
+    when(giteaClient.getCommits("org", "repo"))
+        .thenReturn(List.of(new CommitResponse("sha1", "msg", "author", OffsetDateTime.now())));
 
     var response = controller.list(2L, authentication);
     assertEquals(HttpStatus.OK, response.getStatusCode());

@@ -3,8 +3,8 @@ package com.gestproj.backend.deployment.entity;
 import java.time.LocalDateTime;
 
 import com.gestproj.backend.project.entity.Project;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -125,16 +125,51 @@ public class Deployment {
     this.finishedAt = finishedAt;
   }
 
-  public String getWorkflowName() { return workflowName; }
-  public void setWorkflowName(String workflowName) { this.workflowName = workflowName; }
-  public String getWorkflowRunId() { return workflowRunId; }
-  public void setWorkflowRunId(String workflowRunId) { this.workflowRunId = workflowRunId; }
-  public String getWorkflowUrl() { return workflowUrl; }
-  public void setWorkflowUrl(String workflowUrl) { this.workflowUrl = workflowUrl; }
-  public String getDeploymentTarget() { return deploymentTarget; }
-  public void setDeploymentTarget(String deploymentTarget) { this.deploymentTarget = deploymentTarget; }
-  public String getDockerStatus() { return dockerStatus; }
-  public void setDockerStatus(String dockerStatus) { this.dockerStatus = dockerStatus; }
-  public String getDockerDetails() { return dockerDetails; }
-  public void setDockerDetails(String dockerDetails) { this.dockerDetails = dockerDetails; }
+  public String getWorkflowName() {
+    return workflowName;
+  }
+
+  public void setWorkflowName(String workflowName) {
+    this.workflowName = workflowName;
+  }
+
+  public String getWorkflowRunId() {
+    return workflowRunId;
+  }
+
+  public void setWorkflowRunId(String workflowRunId) {
+    this.workflowRunId = workflowRunId;
+  }
+
+  public String getWorkflowUrl() {
+    return workflowUrl;
+  }
+
+  public void setWorkflowUrl(String workflowUrl) {
+    this.workflowUrl = workflowUrl;
+  }
+
+  public String getDeploymentTarget() {
+    return deploymentTarget;
+  }
+
+  public void setDeploymentTarget(String deploymentTarget) {
+    this.deploymentTarget = deploymentTarget;
+  }
+
+  public String getDockerStatus() {
+    return dockerStatus;
+  }
+
+  public void setDockerStatus(String dockerStatus) {
+    this.dockerStatus = dockerStatus;
+  }
+
+  public String getDockerDetails() {
+    return dockerDetails;
+  }
+
+  public void setDockerDetails(String dockerDetails) {
+    this.dockerDetails = dockerDetails;
+  }
 }

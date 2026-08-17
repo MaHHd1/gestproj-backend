@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.gestproj.backend.gitea.GiteaClient;
+import com.gestproj.backend.member.service.ProjectMemberService;
 import com.gestproj.backend.project.dto.CommitResponse;
 import com.gestproj.backend.project.entity.Project;
 import com.gestproj.backend.project.repository.ProjectRepository;
 import com.gestproj.backend.user.service.UserService;
-import com.gestproj.backend.member.service.ProjectMemberService;
 
 @RestController
 @RequestMapping("/api/projects/{projectId}/commits")
@@ -41,20 +41,23 @@ public class ProjectCommitsController {
   }
 
   @GetMapping
-  public ResponseEntity<List<CommitResponse>> list(@PathVariable Long projectId, Authentication authentication) {
+  public ResponseEntity<List<CommitResponse>> list(
+      @PathVariable Long projectId, Authentication authentication) {
     Project project = projectRepository.findById(projectId).orElse(null);
     if (project == null) {
       return ResponseEntity.notFound().build();
     }
 
     // enforce active membership
-    projectMemberService.findProjectMember(project, userService.findEntityByEmail(authentication.getName()));
+    projectMemberService.findProjectMember(
+        project, userService.findEntityByEmail(authentication.getName()));
 
     if (project.getRepoOwner() == null || project.getRepoName() == null) {
       return ResponseEntity.ok(List.of());
     }
 
-    List<CommitResponse> commits = giteaClient.getCommits(project.getRepoOwner(), project.getRepoName());
+    List<CommitResponse> commits =
+        giteaClient.getCommits(project.getRepoOwner(), project.getRepoName());
     return ResponseEntity.ok(commits);
   }
 }
