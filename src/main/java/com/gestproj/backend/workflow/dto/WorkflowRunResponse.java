@@ -12,6 +12,7 @@ public record WorkflowRunResponse(
     String commitMessage,
     String author,
     String branch,
+    String workflowPath,
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt,
     String htmlUrl) {}

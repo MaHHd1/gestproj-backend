@@ -21,6 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gestproj.backend.project.dto.CommitResponse;
 import com.gestproj.backend.workflow.dto.WorkflowJobResponse;
 import com.gestproj.backend.workflow.dto.WorkflowRunResponse;
+import com.gestproj.backend.workflow.dto.WorkflowStepResponse;
 
 @Service
 @SuppressWarnings({"PMD.ControlStatementBraces", "PMD.GuardLogStatement"})
@@ -119,11 +120,12 @@ public class GiteaClient {
               text(run, "name", "display_title", "workflow_name"),
               text(run, "status"),
               text(run, "conclusion"),
-              text(headCommit, "id", "sha"),
-              text(headCommit, "message"),
-              text(author, "name", "username", "login"),
-              text(run, "head_branch", "branch"),
-              date(run, "created_at", "run_started_at"),
+          text(headCommit, "id", "sha"),
+          text(headCommit, "message"),
+          text(author, "name", "username", "login"),
+          text(run, "head_branch", "branch"),
+          text(run, "path"),
+          date(run, "created_at", "run_started_at"),
               date(run, "updated_at"),
               text(run, "html_url", "url")));
     }
@@ -144,7 +146,8 @@ public class GiteaClient {
               text(job, "conclusion"),
               date(job, "started_at"),
               date(job, "completed_at"),
-              text(job, "html_url", "url")));
+              text(job, "html_url", "url"),
+              steps(job)));
     }
     return results;
   }
@@ -236,5 +239,22 @@ public class GiteaClient {
       log.debug("Unable to parse Gitea workflow date {}", value, exception);
       return null;
     }
+  }
+
+  private List<WorkflowStepResponse> steps(JsonNode job) {
+    List<WorkflowStepResponse> results = new ArrayList<>();
+    JsonNode steps = job.path("steps");
+    if (!steps.isArray()) return results;
+    for (JsonNode step : steps) {
+      results.add(
+          new WorkflowStepResponse(
+              step.hasNonNull("number") ? step.get("number").asInt() : null,
+              text(step, "name"),
+              text(step, "status"),
+              text(step, "conclusion"),
+              date(step, "started_at"),
+              date(step, "completed_at")));
+    }
+    return results;
   }
 }

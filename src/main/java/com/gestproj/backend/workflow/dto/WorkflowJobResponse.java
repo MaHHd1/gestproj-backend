@@ -1,6 +1,7 @@
 package com.gestproj.backend.workflow.dto;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /** A job inside a Gitea Actions workflow run. */
 public record WorkflowJobResponse(
@@ -10,4 +11,5 @@ public record WorkflowJobResponse(
     String conclusion,
     OffsetDateTime startedAt,
     OffsetDateTime completedAt,
-    String htmlUrl) {}
+    String htmlUrl,
+    List<WorkflowStepResponse> steps) {}
