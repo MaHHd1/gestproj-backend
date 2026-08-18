@@ -35,7 +35,7 @@ jobs:
           docker build -t infra-backend:latest .
           docker inspect backend --format '{{range .Config.Env}}{{println .}}{{end}}' > backend.env
           docker rm -f backend || true
-          docker run -d --name backend --restart unless-stopped --network infra_infra_net -p 8081:8080 --env-file backend.env infra-backend:latest
+          docker run -d --name backend --restart unless-stopped --network infra_infra_net -p 8081:8080 --env-file backend.env -e GITEA_BASE_URL=http://100.83.8.6:3000 -e GITEA_USERNAME='${{ secrets.REPO_READER_USERNAME }}' -e GITEA_PASSWORD='${{ secrets.REPO_READER_PASSWORD }}' infra-backend:latest
 
       - name: Verify backend health
         run: |

@@ -30,13 +30,20 @@ public class GiteaClient {
 
   private final String baseUrl;
   private final String token;
+  private final String username;
+  private final String password;
   private final HttpClient httpClient;
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   public GiteaClient(
-      @Value("${app.gitea.base-url}") String baseUrl, @Value("${app.gitea.token}") String token) {
+      @Value("${app.gitea.base-url}") String baseUrl,
+      @Value("${app.gitea.token:}") String token,
+      @Value("${app.gitea.username:}") String username,
+      @Value("${app.gitea.password:}") String password) {
     this.baseUrl = baseUrl;
     this.token = token;
+    this.username = username;
+    this.password = password;
     this.httpClient = HttpClient.newHttpClient();
   }
 
@@ -47,9 +54,7 @@ public class GiteaClient {
     try {
       String url = String.format("%s/api/v1/repos/%s/%s/commits", baseUrl, owner, repo);
       HttpRequest.Builder reqBuilder = HttpRequest.newBuilder().uri(URI.create(url)).GET();
-      if (token != null && !token.isBlank()) {
-        reqBuilder.header("Authorization", "token " + token);
-      }
+      applyAuthorization(reqBuilder);
       HttpRequest req = reqBuilder.build();
       HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
       if (resp.statusCode() >= 200 && resp.statusCode() < 300) {
@@ -181,8 +186,21 @@ public class GiteaClient {
     String url =
         String.format("%s/api/v1/repos/%s/%s%s", baseUrl, encode(owner), encode(repo), path);
     HttpRequest.Builder request = HttpRequest.newBuilder().uri(URI.create(url)).GET();
-    if (token != null && !token.isBlank()) request.header("Authorization", "token " + token);
+    applyAuthorization(request);
     return httpClient.send(request.build(), HttpResponse.BodyHandlers.ofString());
+  }
+
+  private void applyAuthorization(HttpRequest.Builder request) {
+    if (token != null && !token.isBlank()) {
+      request.header("Authorization", "token " + token);
+    } else if (username != null && !username.isBlank() && password != null && !password.isBlank()) {
+      String credentials = username + ":" + password;
+      request.header(
+          "Authorization",
+          "Basic "
+              + java.util.Base64.getEncoder()
+                  .encodeToString(credentials.getBytes(StandardCharsets.UTF_8)));
+    }
   }
 
   private boolean hasRepository(String owner, String repo) {
