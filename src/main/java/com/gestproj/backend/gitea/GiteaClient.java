@@ -154,7 +154,7 @@ public class GiteaClient {
 
   public String getWorkflowJobLogs(String owner, String repo, Long runId, Long jobId) {
     if (!hasRepository(owner, repo)) return "";
-    String path = "/actions/runs/" + runId + "/jobs/" + jobId + "/logs";
+    String path = "/actions/jobs/" + jobId + "/logs";
     try {
       HttpResponse<String> response = send(owner, repo, path);
       if (response.statusCode() >= 200 && response.statusCode() < 300) return response.body();
