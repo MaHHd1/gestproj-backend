@@ -24,7 +24,7 @@ import com.gestproj.backend.user.service.UserService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/projects/{projectId}/members")
+@RequestMapping({"/api/projects/{projectId}/members", "/projects/{projectId}/members"})
 public class ProjectMemberController {
 
   private final ProjectRepository projectRepository;

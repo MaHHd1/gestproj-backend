@@ -14,7 +14,7 @@ import com.gestproj.backend.notification.dto.NotificationResponse;
 import com.gestproj.backend.notification.service.NotificationService;
 
 @RestController
-@RequestMapping("/notifications")
+@RequestMapping({"/api/notifications", "/notifications"})
 public class NotificationController {
 
   private final NotificationService notificationService;

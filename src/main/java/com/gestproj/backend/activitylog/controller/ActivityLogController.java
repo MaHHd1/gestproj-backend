@@ -19,7 +19,7 @@ import com.gestproj.backend.user.entity.User;
 import com.gestproj.backend.user.service.UserService;
 
 @RestController
-@RequestMapping("/projects/{projectId}/activity-logs")
+@RequestMapping({"/api/projects/{projectId}/activity-logs", "/projects/{projectId}/activity-logs"})
 public class ActivityLogController {
 
   private final ActivityLogService activityLogService;

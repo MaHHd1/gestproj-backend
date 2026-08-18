@@ -13,7 +13,7 @@ import com.gestproj.backend.user.dto.UserResponse;
 import com.gestproj.backend.user.service.UserService;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping({"/api/users", "/users"})
 public class UserController {
 
   private final UserService userService;

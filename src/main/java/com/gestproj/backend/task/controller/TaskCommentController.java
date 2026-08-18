@@ -20,7 +20,7 @@ import com.gestproj.backend.task.service.TaskCommentService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/tasks/{taskId}/comments")
+@RequestMapping({"/api/tasks/{taskId}/comments", "/tasks/{taskId}/comments"})
 public class TaskCommentController {
 
   private final TaskCommentService taskCommentService;

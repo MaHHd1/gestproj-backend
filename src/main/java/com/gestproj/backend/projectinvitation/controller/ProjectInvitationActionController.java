@@ -12,7 +12,7 @@ import com.gestproj.backend.projectinvitation.dto.ProjectInvitationResponse;
 import com.gestproj.backend.projectinvitation.service.ProjectInvitationService;
 
 @RestController
-@RequestMapping("/invites")
+@RequestMapping({"/api/invites", "/invites"})
 public class ProjectInvitationActionController {
 
   private final ProjectInvitationService projectInvitationService;

@@ -15,7 +15,7 @@ import com.gestproj.backend.task.dto.TaskUpdateRequest;
 import com.gestproj.backend.task.service.TaskService;
 
 @RestController
-@RequestMapping("/tasks")
+@RequestMapping({"/api/tasks", "/tasks"})
 public class TaskController {
 
   private final TaskService taskService;

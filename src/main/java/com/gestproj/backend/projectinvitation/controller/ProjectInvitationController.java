@@ -19,7 +19,7 @@ import com.gestproj.backend.projectinvitation.service.ProjectInvitationService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/projects/{projectId}/invites")
+@RequestMapping({"/api/projects/{projectId}/invites", "/projects/{projectId}/invites"})
 public class ProjectInvitationController {
 
   private final ProjectInvitationService projectInvitationService;

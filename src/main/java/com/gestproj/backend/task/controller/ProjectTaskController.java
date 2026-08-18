@@ -24,7 +24,7 @@ import com.gestproj.backend.task.service.TaskService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/projects/{projectId}/tasks")
+@RequestMapping({"/api/projects/{projectId}/tasks", "/projects/{projectId}/tasks"})
 public class ProjectTaskController {
 
   private final TaskService taskService;
