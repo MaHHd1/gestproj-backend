@@ -3,7 +3,10 @@ package com.gestproj.backend.workflow.dto;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /** A job inside a Gitea Actions workflow run. */
+@SuppressFBWarnings({"EI_EXPOSE_REP", "EI_EXPOSE_REP2"})
 public record WorkflowJobResponse(
     Long id,
     String name,
@@ -12,4 +15,8 @@ public record WorkflowJobResponse(
     OffsetDateTime startedAt,
     OffsetDateTime completedAt,
     String htmlUrl,
-    List<WorkflowStepResponse> steps) {}
+    List<WorkflowStepResponse> steps) {
+  public WorkflowJobResponse {
+    steps = steps == null ? List.of() : List.copyOf(steps);
+  }
+}

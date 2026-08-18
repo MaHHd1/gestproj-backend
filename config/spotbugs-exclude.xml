@@ -9,6 +9,11 @@
     <Class name="~com\.gestproj\.backend\.(activitylog\.entity\.ActivityLog|member\.entity\.ProjectMember|notification\.entity\.Notification|project\.entity\.Project|projectinvitation\.entity\.ProjectInvitation|task\.entity\.(Task|TaskComment)|deployment\.entity\.Deployment)"/>
   </Match>
 
+  <Match>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    <Class name="com.gestproj.backend.workflow.dto.WorkflowJobResponse"/>
+  </Match>
+
   <!-- Spring injects shared collaborators; retaining those references is intentional. -->
   <Match>
     <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
