@@ -66,6 +66,26 @@ APP_FRONTEND_URL=http://localhost:3000
 
 Resend via SMTP is the recommended provider.
 
+## Public access with Tailscale Funnel
+
+When this host is on Tailscale, the included frontend container serves both the Angular
+application and the API under one origin. Build and start it with:
+
+```bash
+docker compose up --build -d
+```
+
+Then, on the host that runs Docker, publish the frontend over HTTPS:
+
+```bash
+tailscale funnel 8081
+```
+
+Tailscale prints the resulting public `https://<machine>.<tailnet>.ts.net` URL. Set
+`APP_FRONTEND_URL` to that exact URL before enabling email, so invitation and password-reset
+links point to the public application. The frontend is bound to `127.0.0.1:8081`; the backend
+continues to be available on port 8080 for local administration.
+
 ## Deployment monitoring and server integration
 
 Projects can optionally be linked to a Gitea repository and a deployment target. The backend exposes repository activity and deployment history for the frontend.
@@ -91,3 +111,4 @@ GITEA_TOKEN=<optional-access-token>
 ```bash
 ./mvnw test
 ```
+Aa

@@ -114,18 +114,48 @@ public class GiteaClient {
     for (JsonNode run : runs) {
       JsonNode headCommit = run.path("head_commit");
       JsonNode author = headCommit.path("author");
+      String commitHash = text(headCommit, "id", "sha");
+      if (commitHash == null) {
+        commitHash = text(run, "head_sha", "commit_sha", "sha");
+      }
+      String commitMessage = text(headCommit, "message");
+      String authorName = text(author, "name", "username", "login");
+      if (authorName == null) {
+        authorName = text(run.path("actor"), "full_name", "name", "username", "login");
+      }
+      if (authorName == null) {
+        authorName = text(run.path("triggering_actor"), "full_name", "name", "username", "login");
+      }
+
+      // Gitea Actions responses commonly provide only head_sha. Fetching the commit fills in
+      // the message and author so workflow entries show the same useful context as commits.
+      if (commitHash != null && (commitMessage == null || authorName == null)) {
+        JsonNode commit = getJson(owner, repo, "/commits/" + encode(commitHash));
+        if (commit != null) {
+          JsonNode commitDetails = commit.path("commit");
+          if (commitMessage == null) {
+            commitMessage = text(commitDetails, "message");
+          }
+          if (authorName == null) {
+            authorName = text(commitDetails.path("author"), "name", "username", "login");
+          }
+          if (authorName == null) {
+            authorName = text(commit.path("author"), "full_name", "username", "login");
+          }
+        }
+      }
       results.add(
           new WorkflowRunResponse(
               longValue(run, "id", "run_id"),
               text(run, "name", "display_title", "workflow_name"),
               text(run, "status"),
               text(run, "conclusion"),
-          text(headCommit, "id", "sha"),
-          text(headCommit, "message"),
-          text(author, "name", "username", "login"),
-          text(run, "head_branch", "branch"),
-          text(run, "path"),
-          date(run, "created_at", "run_started_at"),
+              commitHash,
+              commitMessage,
+              authorName,
+              text(run, "head_branch", "branch"),
+              text(run, "path"),
+              date(run, "created_at", "run_started_at"),
               date(run, "updated_at"),
               text(run, "html_url", "url")));
     }
@@ -221,7 +251,12 @@ public class GiteaClient {
   }
 
   private String text(JsonNode node, String... names) {
-    for (String name : names) if (node.hasNonNull(name)) return node.get(name).asText();
+    for (String name : names) {
+      if (node.hasNonNull(name)) {
+        String value = node.get(name).asText();
+        if (!value.isBlank()) return value;
+      }
+    }
     return null;
   }
 
